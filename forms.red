@@ -1,10 +1,10 @@
-Red [	
-	Title:   "RED Forms Generator"
-	Author:  "PlanetSizeCpu"
-	Contributor: "YKProg"
-	File: 	 %forms_dynamic.red
-	Version: Under Development see below
-	Needs:	 'View
+Red [
+	title: "RED Forms Generator"
+	author: "PlanetSizeCpu"
+	contributor: "Yaron Koresh"
+	file: %forms.red
+	version: 1.0.0
+	needs: 'view
 	Usage:  {
 		Use for form scripts generation, save result then copy&paste or load code
 	}
@@ -18,429 +18,651 @@ Red [
 	]
 ]
 
-WindowDefXsize: 800
-WindowDefYsize: 650
-WindowDefSize: as-pair WindowDefXsize WindowDefYsize
-WindowMinXSize: 800
-WindowMinYSize: 650
-
-FormSheetDefXorigin: 145
-FormSheetDefYorigin: 17
-FormSheetDefOrigin: as-pair FormSheetDefXorigin FormSheetDefYorigin
-FormSheetDefXsize: WindowDefXsize - FormSheetDefXorigin
-FormSheetDefYsize: WindowDefYsize - 135
-FormSheetDefSize: as-pair FormSheetDefXsize FormSheetDefYsize
-FormSheetStr: ""
-FormSheetCounter: 0
+WindowSizeX: 1000
+WindowSizeY: 800
+WindowSize: as-pair WindowSizeX WindowSizeY
+WindowMinSizeX: 1000
+WindowMinSizeY: 800
+AllWidgets: [
+        "area" "base" "box" "button"
+        "calendar" "camera" "check"
+        "drop-down" "drop-list" "field"
+        "group-box" "image" "panel"
+        "progress" "radio" "scroller"
+        "slider" "tab-panel" "text" "text-list"
+]
+ToolboxSizeX: 130
+ToolboxFormSheetSize: as-pair ToolboxSizeX 60
+ToolboxWidgetsSize: as-pair ToolboxSizeX 200
+ToolboxFontSize: as-pair ToolboxSizeX 125
+ToolboxFileSize: as-pair ToolboxSizeX 85
+ToolboxWidgetList: AllWidgets
+FontSelection: none
+FontName: "Arial"
+FontStyle: 'normal
+FontSize: 14
+FontGroupFontName: none
+FontGroupFontStyle: none
+FontGroupFontSize: none
+FormSheet: none
+FormSheetSize: none
+FormSheetSizeX: none
+FormSheetSizeY: none
+FormSheetOriginX: ToolboxSizeX + 10
+FormSheetOriginY: 0
+FormSheetOrigin: as-pair FormSheetOriginX FormSheetOriginY
+FormSheetWidgetForeground: none
+FormSheetWidgetBackground: none
 FormSheetContent: []
 FormSheetRecodeBlock: []
-FormSheetWidgetSize: 200x150
-FormSheetWidgetBackground: gray
-FormSheetWidgetForeground: black
+StaticEditor: none
+StaticEditorOrigin: none
+StaticEditorOriginX: 0
+StaticEditorOriginY: none
+StaticEditorSizeX: none
+StaticEditorSizeY: 300
+StaticEditorSize: none
+DynamicEditor: none
+DynamicEditorOrigin: none
+DynamicEditorOriginX: none
+DynamicEditorOriginY: 0
+DynamicEditorSize: none
+DynamicEditorSizeX: 360
+DynamicEditorSizeY: WindowSizeY
+Globalcode: ""
+DefaultForegroundColor: black
+DefaultBackgroundColor: white
+FormSheetCounter: 0
+Globalcode: ""
 
-str: make string! FormSheetDefSize
-ToolboxDefXsize: 125
-ToolboxFileSize: as-pair ToolboxDefXsize 90
-ToolboxFontSize: as-pair ToolboxDefXsize 140
-ToolboxWidgetsSize: as-pair ToolboxDefXsize 200
-ToolboxFormSheetSize: as-pair ToolboxDefXsize 60
-ToolboxWidgetList: ["area" "base" "box" "button" "calendar" "camera" "check" "drop-down" "drop-list" "field" "group-box" "image" "panel" "progress" "radio" "scroller" "slider" "tab-panel" "text" "text-list"]
-
-DynamicEditorDefXsize: (WindowDefXsize / 3)
-StaticEditorDefXsize: (WindowDefXsize / 3 * 2)
-EditorDefYsize: 114
-DynamicEditorDefSize: as-pair DynamicEditorDefXsize EditorDefYsize
-staticEditorDefSize: as-pair StaticEditorDefXsize EditorDefYsize
-StaticDefOrigin: as-pair 0 (FormSheetDefYorigin + FormSheetDefYsize + 5)
-DynamicDefOrigin: as-pair StaticEditorDefXsize (FormSheetDefYorigin + FormSheetDefYsize + 5)
-DynamicCode: does copy [" "]
-
-FontSel: attempt [make font! [name: "Arial" size: 14 style: "normal" color:FormSheetWidgetForeground ] ]
-FontDefName: "Arial"
-FontDefStyl: "Normal"
-FontDefSize: "14"
-
-forg: func[
-    clr [tuple!]
-][
-    FormSheetWidgetForeground: clr
-    unview
-    WidgetGroupFgn/color: clr
-]
-
-bacg: func[
-    clr [tuple!]
-][
-    FormSheetWidgetBackground: clr
-    unview
-    WidgetGroupBgn/color: clr
-]
-
-specified-color-f: function [][
-
-	to-color: function [r g b][0
-        color: 0.0.0
-        if r [color/1: to integer! 256 * r]
-        if g [color/2: to integer! 256 * g]
-        if b [color/3: to integer! 256 * b]
-        color
+gui-updater: func [] [
+    print "gui-updater: func called"
+    mainScreenSizeAdjust
+    FormSheetContent: []
+    FormSheetRecodeBlock: []
+    if none? FormSheetWidgetBackground [
+        FormSheetWidgetBackground: DefaultBackgroundColor
+        print "gui-updater: FormSheetWidgetBackground is none, set to default"
     ]
-
-    to-text: function [val][form to integer! 0.5 + 255 * any [val 0]]
-
-    view [
-        title "Color sliders"
-        style txt: text 40 right
-        style value: text "0" 30 right bold
-	
-        across
-        txt "Red:"   R: slider 256 value react [face/text: to-text R/data] return
-        txt "Green:" G: slider 256 value react [face/text: to-text G/data] return
-        txt "Blue:"  B: slider 256 value react [face/text: to-text B/data]
-	
-        pad 0x-65 box: base react [face/color: to-color R/data G/data B/data] return
-
-        pad 0x20 text "The new color"
-            font  [size: 14]
-            react [face/font/color: box/color]
-        button "Done!" [do forg box/color]
+    if none? FormSheetWidgetForeground [
+        FormSheetWidgetForeground: DefaultForegroundColor
+        print "gui-updater: FormSheetWidgetForeground is none, set to default"
     ]
-]
-
-specified-color-b: function [][
-
-	to-color: function [r g b][0
-        color: 0.0.0
-        if r [color/1: to integer! 256 * r]
-        if g [color/2: to integer! 256 * g]
-        if b [color/3: to integer! 256 * b]
-        color
-    ]
-
-    to-text: function [val][form to integer! 0.5 + 255 * any [val 0]]
-
-    view [
-        title "Color sliders"
-        style txt: text 40 right
-        style value: text "0" 30 right bold
-	
-        across
-        txt "Red:"   R: slider 256 value react [face/text: to-text R/data] return
-        txt "Green:" G: slider 256 value react [face/text: to-text G/data] return
-        txt "Blue:"  B: slider 256 value react [face/text: to-text B/data]
-	
-        pad 0x-65 box: base react [face/color: to-color R/data G/data B/data] return
-
-        pad 0x20 text "The new color"
-            font  [size: 14]
-            react [face/font/color: box/color]
-        button "Done!" [do bacg box/color]
-    ]
-]
-
-mainScreen: layout [
-
-	title "RED FORMS" 
-	size WindowDefSize
-	below center
-	style btn: button 100x20 red black bold
-
-	InfoGroup: group-box ToolboxFormSheetSize "Form-sheet size" [
-		InfoGroupFormSize: text 100x25 center bold font-size 14 str
-	]
-
-	WidgetGroup: group-box ToolboxWidgetsSize "Widgets" [
-		below center
-		text center 100x15 bold "Size:"
-        WidgetGroupSize: field 100x20 data FormSheetWidgetSize
-		across middle
-        text 70x20 left "Foreground:"
-		WidgetGroupFgn: box 20x20 FormSheetWidgetForeground [specified-color-f]
-        return
-        text 70x20 left "Background:"
-		WidgetGroupBgn: box 20x20 FormSheetWidgetBackground [specified-color-b]
-		return below center
-		WidgetGroupList: drop-down data ToolboxWidgetList select 1
-		WidgetGroupAddbtn: btn bold "Add" [FormSheetAddWidget]
-	]
-
-	FontGroup: group-box ToolboxFontSize "Font" [ 
-		below
-		FontGroupFontName: text bold 90x15 FontDefName
-		FontGroupFontStyl: text bold 90x15 FontDefStyl
-		across
-		text 30x25 bold "Size:"
-		FontGroupFontSize: text bold 30x15 FontDefSize
-		return
-		below
-		FontGroupFontBtn: btn bold "Font" [attempt [FormFontChange]]
-		return
-	]
-
-	SourceGroup: group-box ToolboxFileSize "File" [
-		below center
-		RunButton: btn "Run" [Recode attempt [SourceRun]]
-		SaveSourceButton: btn "Save" [SourceSave] 
-	]
-	
-	at FormSheetDefOrigin
-	FormSheet: panel FormSheetDefSize white blue cursor cross []
-
-	at StaticDefOrigin
-	EditorStatic: area StaticEditorDefSize 250.240.240 yellow
-
-	at DynamicDefOrigin
-	EditorDynamic: area DynamicEditorDefSize black green
-
-	on-resize [mainScreenSizeAdjust2]
-	on-detect [mainScreenSizeAdjust1]
-]
-
-system/view/capturing?: yes
-
-mainScreen/actors: context [
-    on-detect: func [f e][
-        foreach-face f[
-            if select face/actors 'on-detect [
-                face/actors/on-detect face e
+    FormSheetWidgetSize: 150x50
+    DynamicCode: ""
+    if none? FontSelection [
+        print "gui-updater: FontSelection is none, attempting to create default font"
+        FontSelection: attempt [
+            make font! [
+                name: FontName
+                size: FontSize
+                style: FontStyle
+                color: FormSheetWidgetForeground
             ]
         ]
-    ]
-    on-resize: func [f e][
-        foreach-face f[
-            if select face/actors 'on-resize [
-                face/actors/on-resize face e
+        if none? FontSelection [
+            FontSelection: make font! [
+                name: "Arial"
+                size: 14
+                style: 'normal
+                color: 0.0.0
             ]
+            print "gui-updater: Default font creation failed, using basic fallback."
         ]
     ]
-]
-
-EditorStatic/enabled?: false
-
-mainScreenSizeAdjust2: does [
-
-    if FormSheet/Parent/size/x < WindowMinXSize [
-        FormSheet/Parent/size/x: WindowMinXSize
-        mainScreenSizeAdjust1
-    ]
-
-    if FormSheet/Parent/size/y < WindowMinYSize [
-        FormSheet/Parent/size/y: WindowMinYSize
-        mainScreenSizeAdjust1
-    ]
-
-    str: make string! FormSheetDefSize
-    InfoGroupFormSize/text: str
-
+    mainScreenSizeGuard
     Recode
 ]
 
-mainScreenSizeAdjust1: does [
-
-    WindowDefXsize: FormSheet/Parent/size/x
-    WindowDefYsize: FormSheet/Parent/size/y
-    WindowDefsize: as-pair WindowDefXsize WindowDefYsize
-
-    FormSheetDefXorigin: 145
-    FormSheetDefYorigin: 17
-    FormSheetDefOrigin: as-pair FormSheetDefXorigin FormSheetDefYorigin
-    FormSheetDefXsize: WindowDefXsize - FormSheetDefXorigin
-    FormSheetDefYsize: WindowDefYsize - 135
-    FormSheetDefSize: as-pair FormSheetDefXsize FormSheetDefYsize
-
-    FormSheet/offset: FormSheetDefOrigin
-    FormSheet/size: FormSheetDefSize
-
-    DynamicEditorDefXsize: (WindowDefXsize / 3)
-    StaticEditorDefXsize: (WindowDefXsize / 3 * 2)
-    EditorDefYsize: 114
-    DynamicEditorDefSize: as-pair DynamicEditorDefXsize EditorDefYsize
-    staticEditorDefSize: as-pair StaticEditorDefXsize EditorDefYsize
-    StaticDefOrigin: as-pair 0 (FormSheetDefYorigin + FormSheetDefYsize + 5)
-    DynamicDefOrigin: as-pair StaticEditorDefXsize (FormSheetDefYorigin + FormSheetDefYsize + 5)
-
-    EditorStatic/offset: StaticDefOrigin
-    EditorStatic/size: staticEditorDefSize
-    EditorDynamic/offset: DynamicDefOrigin
-    EditorDynamic/size: DynamicEditorDefSize
-
+mainScreenSizeGuard: func [] [
+    print "mainScreenSizeGuard: func called"
+    if not none? FormSheet [
+        parent-face: FormSheet/parent
+        if none? parent-face [
+            print "mainScreenSizeGuard: FormSheet parent is none, returning"
+            return false
+        ]
+        resized: false
+        current-size: parent-face/size
+        if current-size/x < WindowMinSizeX [
+            parent-face/size/x: WindowMinSizeX
+            resized: true
+            print ["mainScreenSizeGuard: Width less than minimum, setting to" WindowMinSizeX]
+        ]
+        if current-size/y < WindowMinSizeY [
+            parent-face/size/y: WindowMinSizeY
+            resized: true
+            print ["mainScreenSizeGuard: Height less than minimum, setting to" WindowMinSizeY]
+        ]
+        if resized [
+            mainScreenSizeAdjust
+        ]
+        if value? 'InfoGroupFormSize [
+            InfoGroupFormSize/text: mold FormSheetSize
+        ]
+        Recode
+    ]
 ]
 
-FormFontChange: does [
-	FontSel: attempt [make font! request-font]
-	FontSel/color: FormSheetWidgetForeground
-	FontDefName: FontSel/name 
-	FontDefSize: to-string FontSel/size 
-	FontGroupFontName/text: FontDefName
-	FontGroupFontStyl/text: FontDefStyl
-	FontGroupFontSize/text: FontDefSize
+mainScreenSizeAdjust: func [] [
+    print "mainScreenSizeAdjust: func called"
+    copyWindowSizeX: none
+    copyWindowSizeY: none
+    either all [object? FormSheet object? FormSheet/parent] [
+        parent-face: FormSheet/parent
+        try-resize: none
+        try-resize: attempt [
+            copyWindowSizeX: parent-face/size/x
+            copyWindowSizeY: parent-face/size/y
+            print ["mainScreenSizeAdjust: Got size from parent:" copyWindowSizeX "x" copyWindowSizeY]
+            true
+        ]
+        if none? try-resize [
+            print "mainScreenSizeAdjust: Error accessing parent size, using defaults."
+            copyWindowSizeX: WindowSizeX
+            copyWindowSizeY: WindowSizeY
+        ]
+    ] [
+        copyWindowSizeX: WindowSizeX
+        copyWindowSizeY: WindowSizeY
+        print ["mainScreenSizeAdjust: Using default size:" copyWindowSizeX "x" copyWindowSizeY]
+    ]
+    if any [none? copyWindowSizeX not number? copyWindowSizeX] [
+        print [
+            "mainScreenSizeAdjust: Invalid X size detected ("
+            mold copyWindowSizeX
+            "), falling back to minimum:"
+            WindowMinSizeX
+        ]
+        copyWindowSizeX: WindowMinSizeX
+    ]
+    if any [none? copyWindowSizeY not number? copyWindowSizeY] [
+        print [
+            "mainScreenSizeAdjust: Invalid Y size detected ("
+            mold copyWindowSizeY
+            "), falling back to minimum:"
+            WindowMinSizeY
+        ]
+        copyWindowSizeY: WindowMinSizeY
+    ]
+    copyWindowSize: as-pair copyWindowSizeX copyWindowSizeY
+    WindowSize: copyWindowSize
+    WindowSizeX: copyWindowSizeX
+    WindowSizeY: copyWindowSizeY
+    DynamicEditorSizeY: WindowSizeY
+    StaticEditorSizeX: to-integer (WindowSizeX - DynamicEditorSizeX)
+    StaticEditorSize: as-pair StaticEditorSizeX StaticEditorSizeY
+    DynamicEditorSize: as-pair DynamicEditorSizeX DynamicEditorSizeY
+    DynamicEditorOriginX: to-integer (WindowSizeX - DynamicEditorSizeX)
+    FormSheetSizeX: to-integer (DynamicEditorOriginX - FormSheetOriginX)
+    FormSheetSizeY: to-integer (WindowSizeY - FormSheetOriginY - StaticEditorSizeY)
+    FormSheetSize: as-pair FormSheetSizeX FormSheetSizeY
+    StaticEditorOriginY: to-integer (FormSheetOriginY + FormSheetSizeY)
+    DynamicEditorOrigin: as-pair DynamicEditorOriginX DynamicEditorOriginY
+    StaticEditorOrigin: as-pair StaticEditorOriginX StaticEditorOriginY
+    if object? FormSheet [
+        FormSheet/offset: FormSheetOrigin
+        FormSheet/size: FormSheetSize
+        print ["mainScreenSizeAdjust: Setting FormSheet offset/size to" FormSheetOrigin FormSheetSize]
+    ]
+    if object? StaticEditor [
+        StaticEditor/offset: StaticEditorOrigin
+        StaticEditor/size: StaticEditorSize
+        print ["mainScreenSizeAdjust: Setting StaticEditor offset/size to" StaticEditorOrigin StaticEditorSize]
+    ]
+    if object? DynamicEditor [
+        DynamicEditor/offset: DynamicEditorOrigin
+        DynamicEditor/size: DynamicEditorSize
+        print ["mainScreenSizeAdjust: Setting DynamicEditor offset/size to" DynamicEditorOrigin DynamicEditorSize]
+    ]
 ]
 
-FormSheetAddWidget: does [
-	
-	FormSheetStr: null
-	FormSheetWidgetName: null
-	FormSheetWidgetType: null
-	FormSheetCounter: add FormSheetCounter 1
-	FormSheetStr: to-string ToolboxWidgetList/(WidgetGroupList/selected)
-	FormSheetWidgetType: to-word copy FormSheetStr
-	append FormSheetStr to-string FormSheetCounter
-	append FormSheetStr ":"
-	FormSheetWidgetName: to-set-word FormSheetStr
-	append FormSheetContent FormSheetStr
-	either unset? 'FormSheetWidgetFiller [] [unset 'FormSheetWidgetFiller]
-	switch FormSheetWidgetType [
-		area		[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		base		[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		box		    [FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		button		[FormSheetWidgetFiller: to-string FormSheetWidgetName]
-		calendar	[FormSheetWidgetFiller: to-string FormSheetWidgetName] 		
-		camera		[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		check		[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		drop-down	[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		drop-list	[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		field		[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		group-box	[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		image		[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		panel		[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		progress	[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		radio		[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		slider		[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		scroller	[FormSheetWidgetFiller: to-string FormSheetWidgetName] 		
-		tab-panel	[FormSheetWidgetFiller: reduce [ to-string (FormSheetWidgetName) [] ] ] 
-		text		[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-		text-list	[FormSheetWidgetFiller: to-string FormSheetWidgetName] 
-	]	
-	
-	Dly: layout reduce [(FormSheetWidgetName) (FormSheetWidgetType) (WidgetGroupSize/data) (FormSheetWidgetFiller)
-		'font FontSel (FormSheetWidgetBackground) (FormSheetWidgetForeground) 'loose 'on-drop [Recode show face] ]		
+FormFontChange: func [] [
+    print "FormFontChange: func called"
+    newFont: attempt [make font! request-font]
+    either all [not error? newFont object? newFont] [
+        FontSelection/color: FormSheetWidgetForeground
+        print [newline newFont newline]
+        FontName: newFont/name
+        FontSize: newFont/size
+        FontStyle: newFont/style
+        if object? FontGroupFontName [
+            if string? FontName [
+                FontGroupFontName/text: FontName
+                FontSelection/name: FontName
+            ]
+            if integer? FontSize [
+                FontGroupFontSize/text: to string! FontSize
+                FontSelection/size: FontSize
+            ]
+            if word? FontStyle [
+                FontGroupFontStyle/text: to string! FontStyle
+                FontSelection/style: FontStyle
+            ]
+        ]
+        print ["FormFontChange: Font changed to" FontName (to string! FontSize) (to string! FontStyle)]
+    ][
+        print "FormFontChange: Error getting new font"
+    ]
+]
 
-    append FormSheet/pane Dly/pane
+GetSelectedType: func [] [
+    return to-word copy to string! pick ToolboxWidgetList WidgetGroupList/selected
+]
 
-	Wgw: get to word! FormSheetWidgetName 
-	Wgw/menu: ["Size  +" Size+ "Size  -" Size- "Change Size" Defsize "Change Font" Deffont "Change Color" Defcolor "Delete" Deletewt]
-	Wgw/actors: make object! [on-menu: func [face [object!] event [event!]][
-        switch event/picked [
-            Size+  [face/size: add face/size 10 Recode]
-			Size-  [face/size: subtract face/size 10 Recode]
-			Defsize [face/size: WidgetGroupSize/data Recode] 
-			Deffont [face/font: copy FontSel Recode]
-			Defcolor [FormSheetSetDefcolor face]
-			Deletewt [FormSheetDeleteWidget face]            
+FormSheetAddWidget: func [] [
+    print "FormSheetAddWidget: func called"
+    if none? FormSheetCounter [
+        FormSheetCounter: 0
+        print "FormSheetAddWidget: FormSheetCounter is none, initialized to 0"
+    ]
+    if none? FormSheetContent [
+        FormSheetContent: []
+        print "FormSheetAddWidget: FormSheetContent is none, initialized to []"
+    ]
+    if none? FontSelection [
+        print "Error: FontSelection is not initialized."
+        return false
+    ]
+    if none? FormSheet [
+        print "Error: FormSheet panel not initialized."
+        return false
+    ]
+    FormSheetCounter: add FormSheetCounter 1
+    widget-index: WidgetGroupList/selected
+    if none? widget-index [
+        widget-index: 1
+        print "FormSheetAddWidget: widget-index is none, set to 1"
+    ]
+    FormSheetStr: to-string pick ToolboxWidgetList widget-index
+    FormSheetWidgetType: to-word copy FormSheetStr
+    append FormSheetStr to-string FormSheetCounter
+    append FormSheetStr ":"
+    FormSheetWidgetName: to-set-word FormSheetStr
+    FormSheetWidgetFiller: none
+    widget-default-size: WidgetGroupSize/data
+    switch FormSheetWidgetType [
+        any ['area 'base 'box 'button 'calendar 'camera 'check
+        'field 'group-box 'image 'panel 'progress 'radio
+        'slider 'scroller 'text 'text-list] [
+            FormSheetWidgetFiller: to-string FormSheetWidgetName
+        ]
+        'drop-down 'drop-list [
+            FormSheetWidgetFiller: copy ["Sample"]
+        ]
+        'tab-panel [
+            FormSheetWidgetFiller: reduce ["Tab 1" []]
         ]
     ]
-    on-drop: func [][Recode]]
-	Wgw/offset: 25x25
-	Recode
+    if none? FormSheetWidgetFiller [
+        FormSheetWidgetFiller: ""
+        print "FormSheetAddWidget: FormSheetWidgetFiller is none, set to ''"
+    ]
+    new-widget-spec: reduce [
+        FormSheetWidgetName
+        FormSheetWidgetType
+        widget-default-size
+        FormSheetWidgetFiller
+        'font
+        FontSelection
+        FormSheetWidgetBackground
+        FormSheetWidgetForeground
+        'all-over
+    ]
+    print ["FormSheetAddWidget: new-widget-spec is" mold new-widget-spec]
+    Dly: attempt [layout new-widget-spec]
+    if error? Dly [
+        print ["Error creating widget layout:" mold Dly]
+        return false
+    ]
+    if none? Dly/pane [
+        print ["Error: Layout resulted in no pane for widget: " FormSheetWidgetName]
+        return false
+    ]
+    append FormSheet/pane Dly/pane
+    Wgw: attempt [get to-word FormSheetWidgetName]
+    if any [none? Wgw not object? Wgw] [
+        print ["Error: Failed to get reference to new widget:" FormSheetWidgetName]
+        return false
+    ]
+    append FormSheetContent FormSheetStr
+    Wgw/menu: [
+        "Position: Up" U
+        "Position: Down" D
+        "Position: Left" L
+        "Position: Right" R
+        "Position: Apply default" pos
+        "Size: Increase" Size+
+        "Size: Decrease" Size-
+        "Size: Apply default" Defsize
+        "Font: Apply default" Deffont
+        "Colors: Apply default" Defcolor
+        "Delete Widget!" Deletewt
+    ]
+    Wgw/actors: make object! [
+        on-menu: func [face event] [
+            switch event/picked [
+                U [
+                    face/offset/y: max 25 face/offset/y - 50
+                    Recode
+                ]
+                D [
+                    face/offset/y: face/offset/y + 50
+                    Recode
+                ]
+                L [
+                    face/offset/x: max 25 face/offset/x - 75
+                    Recode
+                ]
+                R [
+                    face/offset/x: face/offset/x + 75
+                    Recode
+                ]
+                Size+ [
+                    face/size: face/size + 25x25
+                    Recode
+                ]
+                Size- [
+                    face/size: max 20x20 face/size - 25x25
+                    Recode
+                ]
+                Defsize [
+                    face/size: WidgetGroupSize/data
+                    Recode
+                ]
+                Deffont [
+                    face/font: copy FontSelection
+                    Recode
+                ]
+                Defcolor [
+                    FormSheetSetDefcolor face
+                    Recode
+                ]
+                Deletewt [
+                    FormSheetDeleteWidget face face/text
+                    Recode
+                ]
+            ]
+        ]
+        on-key-down: func [face event] [
+            face/enabled?: no
+            face/enabled?: yes
+        ]
+    ]
+    Wgw/offset: 175x225
+    Recode
+    print ["FormSheetAddWidget: Added widget" FormSheetWidgetName "of type" FormSheetWidgetType]
 ]
 
-FormSheetDeleteWidget: func [face [object!]][
-
-	either none? face/text [Wnm: to-string face/data] [Wnm: face/text]
-	append Wnm ":"	
-	alter FormSheetContent Wnm
-	if [face? to-word Wnm] [unset to-word Wnm]
-	remove find face/parent/pane face
-	Recode
+FormSheetDeleteWidget: func [
+    face[object!]
+    name[string!]
+    /local widget-name-str widget-name-word widget-face
+][
+    print "FormSheetDeleteWidget: func called"
+    face-name-str: copy trim/with name ":"
+    widget-name-str: none
+    widget-name-word: none
+    widget-face: none
+    foreach name-str FormSheetContent [
+        probe-word: attempt [to-word name-str]
+        if all [
+            word? probe-word
+        ] [
+            face-name-str-2: trim/with (to string! probe-word) ":"
+            print ["Checking equality:" face-name-str face-name-str-2]
+            if all [face-name-str = face-name-str-2][
+                widget-name-str: copy name-str
+                widget-name-word: probe-word
+                widget-face: get probe-word
+                break
+            ]
+        ]
+    ]
+    if none? widget-name-str [
+        print ["Error: Could not find name string for face to delete: " mold face/text]
+        return false
+    ]
+    remove-each item FormSheetContent [item = widget-name-str]
+    parent-panel: widget-face/parent
+    either find parent-panel/pane widget-face [
+        remove find parent-panel/pane widget-face
+        print ["FormSheetDeleteWidget: Removed face from parent pane:" mold widget-face/text]
+    ][
+        print ["Warning: Face to delete not found in parent pane:" mold widget-face/text]
+    ]
+    if all [word? widget-name-word value? widget-name-word] [
+        unset widget-name-word
+        print ["FormSheetDeleteWidget: Unset variable:" widget-name-word]
+    ]
+    Recode
 ]
 
-FormSheetSetDefcolor: func [face [object!]][
-	face/color: FormSheetWidgetBackground face/font/color: FormSheetWidgetForeground
-	Recode
+FormSheetSetDefcolor: func [face [object!]] [
+    print "FormSheetSetDefcolor: func called"
+    face/color: FormSheetWidgetBackground
+    face/font/color: FormSheetWidgetForeground
+    Recode
 ]
 
-Recode: does [
-	
-	clear FormSheetRecodeBlock
-	Widget: copy "size "
-	append Widget FormSheetDefSize
-	append FormSheetRecodeBlock Widget
-	foreach Wgt FormSheetContent [
-
-		Wgw: get to word! Wgt
-		
-		Widget: copy "at "
-		
-		Woffset: Wgw/offset
-		append Widget Woffset
-		append Widget " "
-		
-		append Widget Wgt
-		append Widget " "
-		
-		Wtype: Wgw/type
-		append Widget Wtype
-		append Widget " "
-		
-		Wsize: Wgw/size
-		append Widget Wsize
-		append Widget " "		
-		
-		Wcolor: Wgw/color
-		append Widget Wcolor
-		append Widget " "
-		
-		Wcolor: Wgw/font/color
-		append Widget Wcolor
-		append Widget " "
-		
-		Wfiller: copy ""
-		switch/default Wtype [
-			tab-panel [
-				Wfiller: copy mold reduce [ Wgt [] ]
-				append Widget Wfiller]
-			text [Wfiller: copy Wgw/text append Widget mold Wfiller
-					Wfiller: " para [align: 'center v-align: 'middle]"	
-					append Widget Wfiller]
-		][
-			Wfiller: copy Wgw/text	
-			append Widget mold Wfiller
-		] 
-
-        append Widget " "
-		Wft: copy "font ["
-		append Wft "name: " 
-		append Wft dbl-quote
-		append Wft Wgw/font/name
-		append Wft dbl-quote
-		append Wft " "
-		append Wft "size: "
-		append Wft Wgw/font/size
-		append Wft " "
-		append Wft "style: '"
-		append Wft Wgw/font/style
-		append Wft "]"
-		append Widget Wft
-		append FormSheetRecodeBlock Widget
-	]
-	
-	EditorStatic/text: copy "Red [ Needs: 'View ]" 
-	append EditorStatic/text newline
-	append EditorStatic/text "view ["
-	foreach Wgt FormSheetRecodeBlock [append EditorStatic/text newline append EditorStatic/text Wgt]
-	append EditorStatic/text newline 
-	append EditorStatic/text "]"
-	append EditorStatic/text newline
-	
-	Globalcode: copy EditorStatic/text
-	append Globalcode newline
-	append Globalcode "DynamicCode: does ["
-	append Globalcode newline
-	append Globalcode EditorDynamic/text
-	append Globalcode "]"
-	append Globalcode newline
-	append Globalcode "do DynamicCode"
+Recode: func [] [
+    print "Recode: func called"
+    if none? FormSheetContent [
+        FormSheetContent: []
+        print "Recode: FormSheetContent is none, initialized to []"
+    ]
+    if none? FormSheetRecodeBlock [
+        FormSheetRecodeBlock: []
+        print "Recode: FormSheetRecodeBlock is none, initialized to []"
+    ]
+    if none? FormSheetSize [
+        mainScreenSizeAdjust
+        print "Recode: FormSheetSize is none, calling mainScreenSizeAdjust"
+    ]
+    size-line: copy "size "
+    append size-line mold FormSheetSize
+    clear FormSheetRecodeBlock
+    append FormSheetRecodeBlock size-line
+    foreach WgtNameStr FormSheetContent [
+        WgtNameStr: trim/with WgtNameStr ":"
+        Wgw: attempt [get to-word WgtNameStr]
+        if any [none? Wgw not object? Wgw] [
+            print ["Error: Could not find widget object during Recode for name:" WgtNameStr]
+            continue
+        ]
+        Wgw/text: WgtNameStr
+        WidgetLine: copy ""
+        w-offset: Wgw/offset
+        append WidgetLine "at "
+        append WidgetLine mold w-offset
+        append WidgetLine " "
+        append WidgetLine WgtNameStr
+        append WidgetLine ": "
+        w-type: either word? Wgw/type [Wgw/type] ['base]
+        append WidgetLine mold w-type
+        append WidgetLine " "
+        w-size: either pair? Wgw/size [Wgw/size] [150x25]
+        append WidgetLine mold w-size
+        append WidgetLine " "
+        w-color-bg: either tuple? Wgw/color [Wgw/color] [white]
+        append WidgetLine mold w-color-bg
+        append WidgetLine " "
+        w-color-fg: either all [object? Wgw/font tuple? Wgw/font/color] [Wgw/font/color] [black]
+        append WidgetLine mold w-color-fg
+        append WidgetLine " "
+        w-filler-str: copy mold rejoin [WgtNameStr]
+        append WidgetLine w-filler-str
+        append WidgetLine " "
+        either all [object? Wgw/font] [
+            font-name: either string? Wgw/font/name [Wgw/font/name] ["Arial"]
+            font-size: either integer? Wgw/font/size [Wgw/font/size] [14]
+            font-style: either word? Wgw/font/style [Wgw/font/style] ['normal]
+            font-color: either tuple? Wgw/font/color [Wgw/font/color] [0.0.0]
+            append WidgetLine "font [name: "
+            append WidgetLine mold font-name
+            append WidgetLine " size: "
+            append WidgetLine font-size
+            append WidgetLine " style: '"
+            append WidgetLine font-style
+            append WidgetLine "]"
+        ][
+            append WidgetLine "font [name: "
+            append WidgetLine mold "Arial"
+            append WidgetLine " size: 12 style: '"
+            append WidgetLine "normal"
+            append WidgetLine "]"
+        ]
+        append FormSheetRecodeBlock WidgetLine
+        print ["Recode: Processed widget:" WgtNameStr]
+    ]
+    Globalcode: copy ""
+    append Globalcode "Red ["
+    append Globalcode newline
+    append Globalcode " Title: "
+    append Globalcode mold "My App"
+    append Globalcode newline
+    append Globalcode " Needs: 'view"
+    append Globalcode newline
+    append Globalcode "]"
+    append Globalcode newline
+    append Globalcode "gui: layout ["
+    append Globalcode newline
+    append Globalcode " title "
+    append Globalcode mold "My Red Language Application"
+    append Globalcode newline
+    append Globalcode " backdrop white"
+    append Globalcode newline
+    foreach WgtLine FormSheetRecodeBlock [
+        append Globalcode " "
+        append Globalcode WgtLine
+        append Globalcode newline
+    ]
+    append Globalcode "]"
+    append Globalcode newline
+    append Globalcode "DynamicCode: does ["
+    append Globalcode newline
+    dynamic-user-code: either object? DynamicEditor [DynamicEditor/text] [""]
+    append Globalcode dynamic-user-code
+    append Globalcode newline
+    append Globalcode "]"
+    append Globalcode newline
+    append Globalcode "gui/actors: make object! ["
+    append Globalcode newline
+    append Globalcode " on-create: func [face event] [attempt [do DynamicCode]]"
+    append Globalcode newline
+    append Globalcode "]"
+    append Globalcode newline
+    append Globalcode "view/flags gui [resize]"
+    append Globalcode newline
+    if object? StaticEditor [
+        StaticEditor/text: GlobalCode
+        print "Recode: gui-updater StaticEditor text"
+    ]
+    attempt [show FormSheet/pane]
+    SourceSave
+    print "Recode: gui-updater Globalcode"
 ]
 
-SourceRun: does [
-	do to-block Globalcode
+SourceRun: function [] [
+    SourceSave
+    do %generated_form.red
 ]
 
-SourceSave: does [
-	SourceFile: request-file 
-	either none? SourceFile [][
-		Recode write SourceFile Globalcode
-	]
+SourceCompile: func [] [
+    SourceSave
+    call "red.exe -r -t windows -o generated_form generated_form.red"
 ]
 
+SourceSave: func [] [
+    write %generated_form.red Globalcode
+]
+
+gui-updater
+
+mainScreen: layout [
+    title "Red Forms"
+    size WindowSize
+    backdrop 250.250.250
+    style btn: button 100x20 red black bold font-size 11
+    
+    at 5x2
+    InfoGroup: group-box ToolboxFormSheetSize "Form-sheet size" [
+        InfoGroupFormSize: text 100x25 center bold font-size 14 "N/A"
+    ]
+    at 5x62
+    WidgetGroup: group-box ToolboxWidgetsSize "Widgets" [
+        below center
+        text center 100x15 bold "Size:"
+        WidgetGroupSize: field 100x20 data 150x25
+        across middle
+        text 70x20 left "Foreground:"
+        WidgetGroupFgn: box 20x20 defaultForegroundColor [
+            color-slider [WidgetGroupFgn FontSelection]
+        ]
+        return
+        text 70x20 left "Background:"
+        WidgetGroupBgn: box 20x20 defaultBackgroundColor [
+            color-slider [WidgetGroupBgn]
+        ]
+        return
+        below center
+        WidgetGroupList: drop-down 110x24 data AllWidgets select 1
+        WidgetGroupAddbtn: btn bold "Add" [FormSheetAddWidget]
+    ]
+    at 5x262
+    FontGroup: group-box ToolboxFontSize "Font" [
+        below
+        FontGroupFontName: text bold 90x15 FontName
+        FontGroupFontStyle: text bold 90x15 "Normal"
+        across
+        text 30x15 bold "Size:"
+        FontGroupFontSize: text bold 30x15 "14"
+        return
+        FontGroupFontBtn: btn bold "Font" [FormFontChange]
+    ]
+    at 5x387
+    SourceGroup: group-box ToolboxFileSize "File" [
+        below center
+        RunButton: btn "Run" [
+            SourceRun
+        ]
+        CompileButton: btn "Compile" [
+            SourceCompile
+        ]
+    ]
+    at FormSheetOrigin
+    FormSheet: panel 600x400 white black cursor cross []
+    
+    at StaticEditorOrigin
+    StaticEditor: area 200x200 font [
+        name: "Arial"
+        size: 10
+        style: 'normal
+        color: black
+    ] white ""
+    
+    at DynamicEditorOrigin
+    DynamicEditor: area 600x650 font [
+        name: "Arial"
+        size: 14
+        style: 'bold
+        color: green
+    ] black ""
+]
+
+mainScreen/actors: make object! [
+    on-key-up: func [mainScreenFace mainScreenEvent] [
+        Recode
+    ]
+    on-resize: func [mainScreenFace mainScreenEvent] [
+        gui-updater
+    ]
+    on-close: func [face event] [
+        print "Closing Red Forms Generator."
+    ]
+]
+
+gui-updater
+
+system/view/debug?: no
 view/flags mainScreen [resize]
