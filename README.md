@@ -1,28 +1,24 @@
-GUI design software:
+# Forms: a GUI design software in the Red programming language.
 
-This is a GUI design software writen in Red language, it generates VID code from the 
-designed form sheet, so we save time in design and locate widgets. Also it allows to include hand-made 
-code from the user, save the whole code and run it.
-Note it is no longer maintained.
+This software facilitates GUI design in the Red programming language by generating Visual Interface Dialect (VID) code from the interface layout.
+This process streamlines the design phase and simplifies widget positioning.
+The application also supports the integration of custom user-provided code, allows for saving the complete codebase, and enables direct execution.
+
+**Please note that this software is no longer actively maintained.**
 
 REQUIREMENTS: NONE on Windows, the Red toolchain in other OSs, For Linux GTK Must be installed and running.
 
-![Test Image 0](formstest01.gif)
 ----------------------------------------------------------------
 
-Download the red toolchain from here:
+Download the latest Red toolchain from [www.red-lang.org](https://www.red-lang.org/p/download.html).
 
-Windows: https://static.red-lang.org/dl/auto/win/red-latest.exe
-
-Linux: https://static.red-lang.org/dl/auto/linux/red-latest
-
-MacOS: https://static.red-lang.org/dl/auto/mac/red-latest
+Alternatively, build the latest Red toolchain from [source](https://github.com/red/red/releases/latest).
 
 ----------------------------------------------------------------
 
 To compile the saved code, run the following command from you operating console:
 
-<path_to_red_compiler> -t {windows|linux|macos} -r -o <where_to_save_the_executable> <path_to_your_code>
+`<path_to_red_compiler> -t {windows|linux|macos} -r -o <where_to_save_the_executable> <path_to_your_code>`
 
 ----------------------------------------------------------------
 
