@@ -1,5 +1,7 @@
 # Forms: a GUI design software in the Red programming language.
 
+![demonstration](forms_demo.gif)
+
 This software facilitates GUI design in the Red programming language by generating Visual Interface Dialect (VID) code from the interface layout.
 This process streamlines the design phase and simplifies widget positioning.
 The application also supports the integration of custom user-provided code, allows for saving the complete codebase, and enables direct execution.
