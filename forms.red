@@ -75,6 +75,88 @@ DefaultBackgroundColor: white
 FormSheetCounter: 0
 Globalcode: ""
 
+color-slider: function [
+    elements [series!]
+][
+    ToColor: function[
+        r[integer!]
+        g[integer!]
+        b[integer!]
+    ][
+        if none? r [
+            r: 0
+        ]
+        if none? g [
+            g: 0
+        ]
+        if none? b [
+            b: 0
+        ]
+        color: 0.0.0
+        color/1: r
+        color/2: g
+        color/3: b
+        return color
+    ]
+
+    ToText: function [val][
+        return form to integer! (255 * any [val 0])
+    ]
+    
+    GetPercent: function [part full] [
+        return to percent! ((to integer! part) + 1 / (to integer! full))
+    ]
+    
+    e0: get pick elements 1
+    c1: e0/color/1
+    c2: e0/color/2
+    c3: e0/color/3
+    
+    view [
+        title "Color sliders"
+        style txt: text 40 right
+        across
+        redSliderLabel: txt "Red:"
+        redSliderValue: slider data (GetPercent c1 256) 256
+        redSliderText: text "0" 30 right bold react [
+            face/text: ToText redSliderValue/data
+        ]
+        return
+        greenSliderLabel: txt "Green:"
+        greenSliderValue: slider data (GetPercent c2 256) 256
+        greenSliderText: text "0" 30 right bold react [
+            face/text: ToText greenSliderValue/data
+        ]
+        return
+        blueSliderLabel: txt "Blue:"
+        blueSliderValue: slider data (GetPercent c3 256) 256
+        blueSliderText: text "0" 30 right bold react [
+            face/text: ToText blueSliderValue/data
+        ]
+        pad 0x-65
+        box: base 60x60 react [
+            face/color: ToColor
+                to integer! redSliderText/text
+                to integer! greenSliderText/text
+                to integer! blueSliderText/text
+        ]
+        return
+        pad 0x20
+        newColorDemo: text "The new color" font [size: 14] react [
+            face/font/color: box/color
+            foreach el elements [
+                try [
+                    el: get el
+                    el/color: box/color
+                ]
+            ]
+        ]
+        finishRgbSlider: button "Done!" [
+            unview
+        ]
+    ]
+]
+
 gui-updater: func [] [
     print "gui-updater: func called"
     mainScreenSizeAdjust
