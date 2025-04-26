@@ -1,6 +1,6 @@
 # $\color{#24ACF2}{\text{✨ \color{#FFD700}{Forms} ✨}}$
 
-### $\color{#24ACF2}{\text{A}}$ $\color{#24ACF2}{\text{GUI}}$ $\color{#24ACF2}{\text{Design}}$ $\color{#24ACF2}{\text{Software}}$ $\color{#24ACF2}{\text{for}}$ $\color{#24ACF2}{\text{the}}$ $\color{#F23824}{\text{Red}}$ $\color{#62F224}{\text{Programming}}$ $\color{#62F224}{\text{Language}}$
+### A GUI Design Software for the $\color{#F23824}{\text{Red}}$ $\color{#62F224}{\text{Programming}}$ $\color{#62F224}{\text{Language}}$
 
 <br/>
 
